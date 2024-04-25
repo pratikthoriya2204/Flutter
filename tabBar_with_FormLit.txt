@@ -1,0 +1,334 @@
+// ——— DECLARATION OF PLAYER CLASS ———
+
+class Player {
+  int id;
+  String full_name;
+  String gender;
+  double height;
+  double weight;
+  String Sport;
+
+  Player({
+    required this.id,
+    required this.full_name,
+    required this.gender,
+    required this.height,
+    required this.weight,
+    required this.Sport,
+  });
+}
+
+// ——— GLOBAL VARIABLE DECLARATION ———
+
+import 'player.dart';
+
+class SharedData{
+  static List<String> lstGlobal = [];
+  static List<Player> lstPlayer = [];
+  static String full_name = "";
+  static int selectedIndex=0;
+}
+
+// ——— main file ———
+
+import 'dart:js_util';
+
+import 'player.dart';
+import 'package:flutter/material.dart';
+import 'SharedData.dart';
+
+void main() {
+  runApp(MaterialApp(
+    home: MyApp(),
+  ));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.blueAccent,
+            title: Text("Player Data"),
+            bottom: TabBar(tabs: [
+              Tab(
+                icon: Icon(Icons.insert_comment),
+                text: "Add",
+              ),
+              Tab(
+                icon: Icon(Icons.remove_red_eye_rounded),
+                text: "View",
+              )
+            ]),
+          ),
+          body: TabBarView(children: [
+            AddTab(),
+            ViewTab()
+          ]),
+        )
+    );
+  }
+}
+
+class AddTab extends StatefulWidget {
+  const AddTab({Key? key}) : super(key: key);
+
+  @override
+  State<AddTab> createState() => _AddTabState();
+}
+
+class _AddTabState extends State<AddTab> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  int id = 0;
+  String full_name = "";
+  String gender = "";
+  double height = 0;
+  double weight = 0;
+  String Sport = "";
+  String selectedSport = 'Football'; // Remove the nullable declaration
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Player Information Form"),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                decoration: InputDecoration(labelText: 'ID'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please Enter ID.';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  id = int.parse(value!);
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Full Name'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please Enter Full Name.';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  full_name = value!;
+                },
+              ),
+              Row(
+                children: [
+                  Text("Gender"),
+                  Radio(
+                    value: 'Male',
+                    groupValue: gender,
+                    onChanged: (value) {
+                      setState(() {
+                        gender = value.toString();
+                      });
+                    },
+                  ),
+                  Text('Male'),
+                  Radio(
+                    value: 'Female',
+                    groupValue: gender,
+                    onChanged: (value) {
+                      setState(() {
+                        gender = value.toString();
+                      });
+                    },
+                  ),
+                  Text('Female'),
+                ],
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Height'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please Enter Height.';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  height = double.parse(value!);
+                },
+              ),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Weight'),
+                keyboardType: TextInputType.number,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please Enter Weight.';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  weight = double.parse(value!);
+                },
+              ),
+              DropdownButtonFormField(
+                value: selectedSport,
+                items: <String>[
+                  'Football',
+                  'Basketball',
+                  'Cricket',
+                  'Tennis',
+                  'Running'
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    Sport = value.toString();
+                  });
+                },
+                decoration: InputDecoration(labelText: 'Sport'),
+              ),
+
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+
+                    print('ID: $id');
+                    print('Full Name: $full_name');
+                    print('Gender: $gender');
+                    print('Height: $height');
+                    print('Weight: $weight');
+                    print('Sport: $Sport');
+
+                    Player objPlayer = Player(
+                      id: id,
+                      full_name: full_name,
+                      gender: gender,
+                      height: height,
+                      weight: weight,
+                      Sport: Sport,
+                    );
+
+                    SharedData.lstPlayer.add(objPlayer);
+
+
+                  }
+                },
+                child: Text('Submit'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+class ViewTab extends StatefulWidget {
+  const ViewTab({Key? key}) : super(key: key);
+
+  @override
+  State<ViewTab> createState() => _ViewTabState();
+}
+
+class _ViewTabState extends State<ViewTab> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("View Data"),
+      ),
+      body: ListView.builder(
+          itemCount: SharedData.lstPlayer.length,
+          itemBuilder: (context, index){
+            return Card(
+              child: ListTile(
+                title: Text('Name: ${SharedData.lstPlayer[index].full_name}',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.blueAccent)),
+                subtitle: Text('Sport: ${SharedData.lstPlayer[index].Sport} --- Gender: ${SharedData.lstPlayer[index].gender}',style: TextStyle(fontSize: 10, color:Colors.indigo),),
+                leading: Icon(Icons.person),
+                trailing: Icon(Icons.add),
+                onTap: (){
+                  SharedData.selectedIndex = index;
+                  Navigator.push(context, MaterialPageRoute(builder: (context){
+                    return DetailView();
+                  },)).then((value){
+                    setState(() {
+
+                    });
+                  },);
+                },
+              ),
+            );
+          }
+      ),
+    );
+  }
+}
+
+
+class DetailView extends StatelessWidget {
+  const DetailView({Key? key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Detail View"),
+      ),
+      body: Column(
+        children: [
+          Text(
+            SharedData.lstPlayer[SharedData.selectedIndex].id.toString(),
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          ),
+          SizedBox(height: 10,),
+          Text(
+            SharedData.lstPlayer[SharedData.selectedIndex].full_name,
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          ),
+          SizedBox(height: 10,),
+          Text(
+            SharedData.lstPlayer[SharedData.selectedIndex].gender,
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          ),
+          SizedBox(height: 10,),
+          Text(
+            SharedData.lstPlayer[SharedData.selectedIndex].height.toString(),
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          ),
+          SizedBox(height: 10,),
+          Text(
+            SharedData.lstPlayer[SharedData.selectedIndex].weight.toString(),
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          ),
+          SizedBox(height: 10,),
+          Text(
+            SharedData.lstPlayer[SharedData.selectedIndex].Sport,
+            style: TextStyle(fontSize: 20, color: Colors.red),
+          ),
+          SizedBox(height: 10,),
+          ElevatedButton(onPressed: () {
+            SharedData.lstPlayer.removeAt(SharedData.selectedIndex);
+            
+            Navigator.pop(context);
+          }, child: Text("Delete"))
+        ],
+      ),
+    );
+  }
+}

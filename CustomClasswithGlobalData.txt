@@ -1,0 +1,218 @@
+// ————————————— MAIN DART ————————————————
+
+
+import 'package:customclassapp/GlobalData.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:customclassapp/DetailView.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+//Declaration of Person Class with attributes
+class Person {
+  String name, city;
+  int pincode;
+  Person({required this.name, required this.city, required this.pincode});
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: myHome(),
+    );}}
+
+class myHome extends StatefulWidget {
+  const myHome({Key? key}) : super(key: key);
+
+  @override
+  State<myHome> createState() => _myHomeState();
+}
+
+class _myHomeState extends State<myHome> {
+  // List<Person> persons = [];
+  String strName="";
+  String strCity="";
+  int pincode = 0;
+
+  @override
+  Widget build(BuildContext context) {
+
+    TextEditingController txtName = new TextEditingController();
+    TextEditingController txtCity = new TextEditingController();
+    TextEditingController txtPincode = new TextEditingController();
+
+    return Scaffold(
+        appBar: AppBar(
+          title: Text("Custom Class with List Sample"),
+          backgroundColor: Colors.blueAccent,
+        ),
+        body: Column(
+          children: [
+            TextField(
+              controller: txtName,
+              decoration: InputDecoration(
+                hintText: "Enter Your Name",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(
+                  Icons.person,
+                ),
+              ),
+            ),
+
+            TextField(
+              controller: txtCity,
+              decoration: InputDecoration(
+                hintText: "Enter Your City",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(
+                  Icons.location_city,
+                ),
+              ),
+            ),
+            TextField(
+              controller: txtPincode,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                hintText: "Enter Your Pincode",
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(
+                  Icons.numbers,
+                ),
+              ),
+            ),
+            Row(
+              children: [
+                ElevatedButton(
+
+                    onPressed: () {
+                      String name = txtName.text.toString();
+                      String city = txtCity.text.toString();
+                      int pin = int.parse(txtPincode.text.toString());
+
+                      GlobalData.lstpersons.add(Person(name: name, city: city, pincode:pin ));
+
+                      txtName.clear();
+                      txtCity.clear();
+                      txtPincode.clear();
+                    },
+                    child: Text("Add")),
+                ElevatedButton(
+
+                    onPressed: () {
+                      if(GlobalData.lstpersons.isNotEmpty)
+                      {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) => ViewData()));
+                      }
+                      else
+                        {
+                          print("List is Empty.....!");
+                        }
+                    },
+                    child: Text("View All")),
+              ],
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          child: Icon(Icons.call,),),);
+  }
+}
+
+
+//Second Page with Display Custom Object using ListView, Card and SingleChildScrollView widgets
+
+class ViewData extends StatefulWidget {
+  const ViewData({super.key});
+
+  @override
+  State<ViewData> createState() => _ViewDataState();
+}
+
+class _ViewDataState extends State<ViewData> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("View Data"),
+      ),
+      body: ListView.builder(
+        itemCount: GlobalData.lstpersons.length,
+        itemBuilder: (context, index) {
+          return Card(
+            child: ListTile(
+              title: Text('Name: ${GlobalData.lstpersons[index].name}',style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.blueAccent),),
+              subtitle: Text('City: ${GlobalData.lstpersons[index].city} --- Pincode: ${GlobalData.lstpersons[index].pincode}',style: TextStyle(fontSize: 10, color:Colors.indigo),),
+              leading: Icon(Icons.person),
+              trailing: Icon(Icons.add_card),
+              onTap: () {
+                GlobalData.selectedIndex = index;
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return DetailView();
+                },)).then((value) {
+                  setState(() {
+
+                  });
+                },);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+//Third Page displaying detailed records
+class DetailView extends StatelessWidget {
+  const DetailView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Detail View"),
+      ),
+      body: Column(children: [
+        Text(
+          GlobalData.lstpersons[GlobalData.selectedIndex].name,
+          style: TextStyle(fontSize: 20, color: Colors.red),
+        ),
+        SizedBox(height: 10,),
+        Text(
+          GlobalData.lstpersons[GlobalData.selectedIndex].city,
+          style: TextStyle(fontSize: 20, color: Colors.red),
+        ),
+        SizedBox(height: 10,),
+        Text(
+          GlobalData.lstpersons[GlobalData.selectedIndex].pincode.toString(),
+          style: TextStyle(fontSize: 20, color: Colors.red),
+        ),
+        SizedBox(height: 10,),
+        ElevatedButton(onPressed: () {
+          GlobalData.lstpersons.removeAt(GlobalData.selectedIndex);
+          Navigator.pop(context);
+        }, child: Text("Delete"))
+      ]),
+    );
+  }
+}
+
+// ——— GLOBAL VARIABLE DECLARATION FILE ————
+
+import 'package:customclassapp/main.dart';
+
+class GlobalData
+{
+  static List<Person> lstpersons = [];
+  static int selectedIndex=0;
+}
+
+
+

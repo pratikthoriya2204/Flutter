@@ -1,0 +1,182 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+//The Following Page consists of List Operation and ListView using Card
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: MyHome(),
+    );
+  }
+}
+
+
+class MyHome extends StatefulWidget {
+  const MyHome({Key? key}) : super(key: key);
+
+  @override
+  State<MyHome> createState() => _MyHomeState();
+}
+
+class _MyHomeState extends State<MyHome> {
+  List<int> lstMarks = [];
+  String strValue = "";
+  TextEditingController txtNum = new TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return
+      Scaffold(
+        appBar: AppBar(title: Text("List Demo App")),
+        body: Column(
+          children: [
+            TextField(
+              controller: txtNum,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: InputDecoration(
+                hintText: "Enter a Number",
+                border: OutlineInputBorder(),),),
+            Row(
+              children: <Widget>[
+                ElevatedButton(onPressed: () {
+                  int num = int.parse(txtNum.text);
+                  lstMarks.add(num);
+                  txtNum.clear();
+                  setState(() {
+                    strValue = lstMarks.toString();
+                  });
+                }, child: Text("Add")),
+                ElevatedButton(onPressed: () {
+                  lstMarks.sort();
+                  setState(() {
+                    strValue = lstMarks.toString();
+                  });
+                  //print(lstMarks);
+                }, child: Text("Sort")),
+                ElevatedButton(onPressed: () {
+                  lstMarks.removeAt(2);
+                  //print(lstMarks.length);
+                  setState(() {
+                    strValue = lstMarks.toString();
+                  });
+                }, child: Text("Remove")),
+                ElevatedButton(onPressed: () {
+                  int max = 0;
+                  for (int cntr = 0; cntr < lstMarks.length; cntr++) {
+                    if (lstMarks[cntr] > max) {
+                      max = lstMarks[cntr];
+                    }
+                  }
+                  print(max);
+                }, child: Text("Max")),
+                Text("Entered List is $strValue"),
+              ],
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+
+            //Navigator for Display List Items on Next Page
+            // Navigator.push(context, MaterialPageRoute(
+            //     builder: (context) => NextPage(lstDisplay: lstMarks)));
+
+            //Navigator for Display List Items on Next Page using ListView and Card
+            Navigator.push(context, MaterialPageRoute(
+            builder: (context) => ListsWithCards(lstDisplay: lstMarks)));
+          },
+
+          child: Icon(Icons.call),
+        ),);
+  }
+}
+
+//Second Page with Display List in NextPage
+// class NextPage extends StatelessWidget {
+//   List<int> lstDisplay = [];
+//   NextPage({Key? key,required this.lstDisplay}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('Second Page'),
+//       ),
+//       body: Row(
+//         children: [
+//           Text("The Entered List  $lstDisplay"),
+//           ElevatedButton(
+//             onPressed: () {
+//               // Navigate back to first route when tapped.
+//               Navigator.pop(context);
+//             },
+//             child: const Text('Go back!'),
+//           ),
+//         ],
+//       ),);
+//   }
+// }
+
+//Second Page with Display ListItems using ListView and Card widgets
+class ListsWithCards extends StatelessWidget {
+  @override
+  List<int> lstDisplay = [];
+  ListsWithCards({Key? key,required this.lstDisplay}) : super(key: key);
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('ListView.builder with Card Example'),
+          backgroundColor: Colors.blueAccent,
+        ),
+        body: CardList(listData: lstDisplay),
+      ),
+    );
+  }
+}
+
+class CardList extends StatelessWidget {
+  List<int> listData=[];
+  CardList({required this.listData});
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Card(
+        margin: EdgeInsets.all(10.0),
+        child: Column(
+          children: [
+            ListTile(
+              title: Text("The ListView Displaying Values in Card Format"),
+              leading: Icon(Icons.star),
+            ),
+
+            Divider(),
+            ListView.builder(
+              itemCount: listData.length,
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return Container(
+                    color: Colors.lightGreenAccent,
+                    child: ListTile(
+                      leading: Icon(Icons.numbers),
+                      title: Text(listData[index].toString()),
+                    )
+                );
+              },
+            ),
+          ],
+        ),
+    ),);
+  }
+}
+
